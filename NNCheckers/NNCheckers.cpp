@@ -53,56 +53,7 @@ public:
 			cout << endl;
 		}
 	}
-	int move(int index) {
-		if (index % 8 >= 0 && index % 8 < 4) {
-			if (index % 8 == 0) {
-				
-			}
-		}
-	}
-	void checkMoves() {
-		for (int i = 0; i < 32; i++) {
-			copy(pieces[0], pieces[31], piecesCopy[0]);
-			if (pieces[i] == 1) {
-				if ((i % 8) >= 0 && (i % 8) < 4) {
-					if (i % 8 == 0) {
-						if ((i + 4) == 0) {
-							piecesCopy[i] = 0;
-							piecesCopy[i + 1] = 1;
-							moves.push_back(piecesCopy);
-							copy(pieces[0], pieces[31], piecesCopy[0]);
-						}
-						else {
-							if ((i + 9) == 0) {
-								piecesCopy[i] = 0;
-								piecesCopy[i + 4] = 0;
-								piecesCopy[i + 9] = 1;
-								moves.push_back(piecesCopy);
-								copy(pieces[0], pieces[31], piecesCopy[0]);
-							}
-						}
-					else {
-						if ((i + 4) == 0) {
-							piecesCopy[i] = 0;
-							piecesCopy[i + 1] = 1;
-							moves.push_back(piecesCopy);
-							copy(pieces[0], pieces[31], piecesCopy[0]);
-						}
-						else {
-							if ((i + 9) == 0) {
-								piecesCopy[i] = 0;
-								piecesCopy[i + 4] = 0;
-								piecesCopy[i + 9] = 1;
-								moves.push_back(piecesCopy);
-								copy(pieces[0], pieces[31], piecesCopy[0]);
-							}
-						}
-					}
-					}
-				}
-			}
-		}
-	}
+
 private:
 	char board[8][8];
 	char pieces[32];
@@ -110,12 +61,85 @@ private:
 	vector<char[32]> moves;
 };
 
+class Move : public CheckerBoard {
+public:
+	int initPos, destPos, jumps;
+	vector<int> takenPieces;
+	Move(int initP, int destP, int jmps) {
+		initPos = initP;
+		destPos = destP;
+		jumps = jmps;
+	}
+	int operator [] (int x) {
+		if (x == 0) {
+			return initPos;
+		}
+		else if (x == 1) {
+			return destPos;
+		}
+		else if (x == 2) {
+			return jumps;
+		}
+		else {
+			return 0;
+		}
+	}
+};
+
+//FUNCTIONS DECLARATIONS
+vector<int> GibDiagonals(int x);
+vector<Move> GibMoves(char pieces[32]);
+
 int main()
 {
 	CheckerBoard checkerBoard;
 	checkerBoard.initPieces();
 	checkerBoard.initBoard();
 	checkerBoard.printBoard();
+}
+
+//FUNCTIONS DEFINITIONS
+vector<int> GibDiagonals(int x) { //returns vector of diagonal indexes in a form (right upper, left upper, right down, left down)
+	vector<int> v_diagonals(4, 0);
+	if ((x % 8) >= 0 && (x % 8) < 4) {
+		v_diagonals[0] = x + 4;
+		if ((x % 8) == 0) { v_diagonals[1] = 99; }
+		else { v_diagonals[1] = x + 3; }
+		if (x < 4) { v_diagonals[2] = 99; v_diagonals[3] = 99; }
+		else {
+			v_diagonals[2] = x - 4;
+			if ((x % 8) == 0) { v_diagonals[3] = 99; }
+			else { v_diagonals[3] = x - 5; }
+		}
+	}
+	else if ((x % 8) >= 4 && (x % 8) < 8) {
+		if (x > 27) { v_diagonals[0] = 99; v_diagonals[1] = 99; }
+		else {
+			if ((x % 8) == 7) { v_diagonals[0] = 99;}
+			else { v_diagonals[0] = x + 5; }
+			v_diagonals[1] = x + 4;
+		}
+		if ((x % 8) == 7) { v_diagonals[2] = 99; }
+		else { v_diagonals[2] = x - 3; }
+		v_diagonals[3] = x - 4;
+	}
+	return v_diagonals;
+}
+vector<Move> GibMoves(char pieces[32]) {
+	vector<Move> v_moves;
+	Move m_buff(0, 0, 0);
+	vector<int> diagonals;
+	for (int i = 0; i < 32; i++) {
+		if (pieces[i] == 1) {
+			diagonals = GibDiagonals(i);
+			for (auto d : diagonals) {
+				if (d != 99) {
+					//rekurencje trzeb trzasn¹æ
+				}
+			}
+		}
+	}
+	return v_moves;
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
