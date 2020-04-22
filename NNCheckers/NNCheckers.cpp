@@ -7,91 +7,21 @@
 #include <vector>
 #include <algorithm>
 
+#include "Classes.cpp"
+
 using namespace std;
 
-class CheckerBoard {
-public:
-	void initPieces() {
-		for (int i = 0; i < 32; i++) {
-			pieces[i] = 0;
-		}
-		for (int i = 0; i < 12; i++) {
-			pieces[i] = -1;
-			pieces[31 - i] = 1;
-		}
-	}
-	void initBoard() {
-		int i = 0;
-		for (int y = 0; y < 8; y++)
-			for (int x = 0; x < 8; x++)
-			{
-				if (((x + y) % 2) == 0)
-				{
-					board[y][x] = ' ';
-				}
-				else
-				{
-					if (pieces[i] == -1) {
-						board[y][x] = 'X';
-					}
-					else if (pieces[i] == 1) {
-						board[y][x] = 'O';
-					}
-					else {
-						board[y][x] = '.';
-					}
-					i++;
-				}
-			}
-	}
-	
-	void printBoard() {
-		for (int y = 0; y < 8; y++) {
-			for (int x = 0; x < 8; x++) {
-				cout << board[y][x];
-			}
-			cout << endl;
-		}
-	}
 
-private:
-	char board[8][8];
-	char pieces[32];
-	char piecesCopy[32];
-	vector<char[32]> moves;
-};
-
-class Move : public CheckerBoard {
-public:
-	int initPos, destPos, jumps;
-	vector<int> takenPieces;
-	Move(int initP, int destP, int jmps) {
-		initPos = initP;
-		destPos = destP;
-		jumps = jmps;
-	}
-	int operator [] (int x) {
-		if (x == 0) {
-			return initPos;
-		}
-		else if (x == 1) {
-			return destPos;
-		}
-		else if (x == 2) {
-			return jumps;
-		}
-		else {
-			return 0;
-		}
-	}
-};
 
 //FUNCTIONS DECLARATIONS
-vector<int> GibDiagonals(int x);
-vector<Move> GibMoves(char pieces[32]);
+vector<int> GiveDiagonals(int x);
+vector<Move> GiveMoves(char pieces[32]);
+int SingleDiagonal(int, int);
 
 int main()
 {
+	int test = SingleDiagonal(4, 8);
+	cout << test << endl;
 	CheckerBoard checkerBoard;
 	checkerBoard.initPieces();
 	checkerBoard.initBoard();
@@ -99,7 +29,7 @@ int main()
 }
 
 //FUNCTIONS DEFINITIONS
-vector<int> GibDiagonals(int x) { //returns vector of diagonal indexes in a form (right upper, left upper, right down, left down)
+vector<int> GiveDiagonals(int x) { //returns vector of diagonal indexes in a form (right upper, left upper, right down, left down)
 	vector<int> v_diagonals(4, 0);
 	if ((x % 8) >= 0 && (x % 8) < 4) {
 		v_diagonals[0] = x + 4;
@@ -115,7 +45,7 @@ vector<int> GibDiagonals(int x) { //returns vector of diagonal indexes in a form
 	else if ((x % 8) >= 4 && (x % 8) < 8) {
 		if (x > 27) { v_diagonals[0] = 99; v_diagonals[1] = 99; }
 		else {
-			if ((x % 8) == 7) { v_diagonals[0] = 99;}
+			if ((x % 8) == 7) { v_diagonals[0] = 99; }
 			else { v_diagonals[0] = x + 5; }
 			v_diagonals[1] = x + 4;
 		}
@@ -125,30 +55,32 @@ vector<int> GibDiagonals(int x) { //returns vector of diagonal indexes in a form
 	}
 	return v_diagonals;
 }
-vector<Move> GibMoves(char pieces[32]) {
+int SingleDiagonal(int init_pos, int obstacle_pos) {
+	vector<int> diagonals_1 = GiveDiagonals(init_pos);
+	vector<int> diagonals_2 = GiveDiagonals(obstacle_pos);
+	for (int i = 0; i < 4; i++) {
+		if (diagonals_1[i] == obstacle_pos && diagonals_2[i] != 99) {
+			return diagonals_2[i];
+		}
+	}
+	return 99;
+}
+vector<Move> GiveMoves(char pieces[32]) {
 	vector<Move> v_moves;
-	Move m_buff(0, 0, 0);
-	vector<int> diagonals;
+	vector<int> v_dials;
+	Move current_move;
 	for (int i = 0; i < 32; i++) {
 		if (pieces[i] == 1) {
-			diagonals = GibDiagonals(i);
-			for (auto d : diagonals) {
+			v_dials = GiveDiagonals(i);
+			for (int d : v_dials) {
 				if (d != 99) {
-					//rekurencje trzeb trzasn¹æ
+					if (pieces[d] && !pieces[SingleDiagonal(i , d)]) {
+						Move current_move(i, SingleDiagonal(i, d));
+						//v_moves.push_back(current_move); nie da rady tutaj
+					}
 				}
 			}
 		}
 	}
 	return v_moves;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
