@@ -15,7 +15,7 @@ public:
 			this->pieces[i] = 0;
 		}
 		for (int i = 0; i < 12; i++) {
-			this->pieces[i] = -1;
+			this->pieces[i] = - 1;
 			this->pieces[31 - i] = 1;
 		}
 	}
@@ -76,25 +76,34 @@ public:
 		positions.push_back(takenPieces);
 	}
 	Move(vector<vector<int>> pos) {
-		positions = pos;
+		for (auto vec : pos) {
+			positions.push_back(vec);
+		}
+		//positions = pos;
 	}
 
 
 	void ReassignMove(int position, int destination) {
 		this->positions.clear();
-		this->positions[0].push_back(position);
-		this->positions[0].push_back(destination);
+		vector<int> positions0;
+		positions0.push_back(position);
+		positions0.push_back(destination);
+		this->positions.push_back(positions0);
 	}
 	void ReassignJump(int position, int destination, int taken_piece) {
 		this->positions.clear();
-		this->positions[0].push_back(position);
-		this->positions[0].push_back(destination);
-		this->positions[1].push_back(taken_piece);
+		vector<int> positions0;
+		positions0.push_back(position);
+		positions0.push_back(destination);
+		this->positions.push_back(positions0);
+		vector<int> taken_pieces;
+		taken_pieces.push_back(taken_piece);
+		this->positions.push_back(taken_pieces);
 	}
 	Move ActuateJump(int next_position, int taken_piece) {
-		Move actuated_jump(this->positions[0][0], this->positions[0][1]);
-		actuated_jump[0].push_back(next_position);
-		actuated_jump[1].push_back(taken_piece);
+		Move actuated_jump(this->positions);
+		actuated_jump.positions[0].push_back(next_position);
+		actuated_jump.positions[1].push_back(taken_piece);
 		return actuated_jump;
 	}
 	

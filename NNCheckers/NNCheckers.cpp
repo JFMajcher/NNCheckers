@@ -18,12 +18,12 @@ std::vector<T>& operator+=(std::vector<T>& a, const std::vector<T>& b)
 	return a;
 }
 
-template <typename T>
-std::vector<T>& operator+=(std::vector<T>& aVector, const T& aObject)
-{
-	aVector.push_back(aObject);
-	return aVector;
-}
+//template <typename T>
+//std::vector<T>& operator+=(std::vector<T>& aVector, const T& aObject)
+//{
+//	aVector.push_back(aObject);
+//	return aVector;
+//}
 
 
 //FUNCTIONS DECLARATIONS
@@ -34,18 +34,42 @@ vector<Move> NextJumps(Move, char[32]);
 
 int main()
 {
-	int test = SingleDiagonal(4, 8);
-	cout << test << endl;
+	int tested = 28;
+	vector<int> test = GiveDiagonals(tested);
+	cout << "Diagonals of " << tested << endl;
+	for (auto t : test) {
+		cout << t << endl;
+	}
+	cout << "End of diagonals." << endl;
+	
 	CheckerBoard checkerBoard;
 	checkerBoard.initPieces();
-	cout << sizeof(checkerBoard.pieces) << endl;
-	int test_d = SingleDiagonal(4, 8);
-	cout << test_d << endl;
+	for (int i = 0; i < 12; i++) {
+		checkerBoard.pieces[i] = 0;
+	}
+	vector<int> v_test = {0 , 9, 17, 18};
+	for (int t : v_test) {
+		checkerBoard.pieces[t] = -1;
+	}
+	
+	//cout << sizeof(checkerBoard.pieces) << endl;
+	//int test_d = SingleDiagonal(24, 20);
+	//cout << test_d << endl;
 	/*Move test_move(2, 9);
 	vector<Move> test_jumps;
 	vector<Move> test_jumps = NextJumps(test_move, checkerBoard.pieces);*/
 
 	vector<Move> available_moves = GiveMoves(checkerBoard.pieces);
+	int i = 1;
+	for (auto move : available_moves) {
+		cout << "Move no " << i << endl;
+		i++;
+		for (auto position : move.positions[0]) {
+			cout << position << ' ';
+		}
+		cout << endl;
+	}
+	cout << "Size of vector of moves: " << available_moves.size() << endl;
 	
 	
 	checkerBoard.initBoard();
@@ -79,6 +103,7 @@ vector<int> GiveDiagonals(int x) { //returns vector of diagonal indexes in a for
 	}
 	return v_diagonals;
 }
+//vector<int> GiveKingDiagonals;
 int SingleDiagonal(int init_pos, int obstacle_pos) {
 	vector<int> diagonals_1 = GiveDiagonals(init_pos);
 	vector<int> diagonals_2 = GiveDiagonals(obstacle_pos);
@@ -86,23 +111,25 @@ int SingleDiagonal(int init_pos, int obstacle_pos) {
 		for (int i = 0; i < 4; i++) {
 			if (diagonals_1[i] == obstacle_pos && diagonals_2[i] != 99) {
 				return diagonals_2[i];
+				break;
 			}
 		}
 	}	
 	return 99;
 }
+
 vector<Move> NextJumps(Move jump, char pieces[32]) {
 	vector<Move> possible_jumps;
-	//int position = jump.positions[0].back();
-	//vector<int> diagonals = GiveDiagonals(position);
-	//int size = jump.positions[0].size();
-	/*for (int d : diagonals) {
-		if (d != 99 && pieces[d] != 0 && SingleDiagonal(position, d) != 99) {
+	int position = jump.positions[0].back();
+	vector<int> diagonals = GiveDiagonals(position);
+	int size = jump.positions[0].size();
+	for (int d : diagonals) {
+		if (d != 99 && pieces[d] == -1 && SingleDiagonal(position, d) != 99) {
 			if (d != jump.positions[0][size - 1] && !pieces[SingleDiagonal(position, d)]) {
 				possible_jumps.push_back(jump.ActuateJump(SingleDiagonal(position, d), d));
 			}			
 		}
-	}*/
+	}
 	return possible_jumps;
 }
 vector<Move> GiveMoves(char pieces[32]) {
@@ -114,7 +141,7 @@ vector<Move> GiveMoves(char pieces[32]) {
 			v_dials = GiveDiagonals(i);
 			for (int d : v_dials) {
 				if (d != 99) {
-					if (pieces[d] && SingleDiagonal(i, d) != 99) {
+					if (pieces[d] == -1 && SingleDiagonal(i, d) != 99) {
 						if (!pieces[SingleDiagonal(i, d)]) {
 							current_move.ReassignJump(i, SingleDiagonal(i, d), d);
 							v_moves.push_back(current_move);
@@ -141,14 +168,32 @@ vector<Move> GiveMoves(char pieces[32]) {
 		return v_moves;
 	}
 	else {
-		vector<Move>::iterator it_end = v_moves.end();
+		/*vector<Move>::iterator it_end = v_moves.end();
+		vector<Move> m_buff;
 		for (vector<Move>::iterator it = v_moves.begin(); it != it_end; ++it) {
 			if (!NextJumps(*it, pieces).empty()) {
-				v_moves += NextJumps(*it, pieces);
+				m_buff = NextJumps(*it, pieces);
+				v_moves += m_buff;
 				v_moves.erase(it);
+				m_buff.clear();
+				it--;
 			}
 			it_end = v_moves.end();
+		}*/
+		int s = v_moves.size();
+		vector<Move> m_buff;
+		for (int i = 0; i < s; i) {
+			if (!NextJumps(v_moves[i], pieces).empty()) {
+				m_buff = NextJumps(v_moves[i], pieces);
+				v_moves += m_buff;
+				v_moves.erase(v_moves.begin() + i);
+				i--;
+				s += m_buff.size() - 1;
+			}
 		}
 		return v_moves;
+	}
+	if (v_moves.empty()) {
+		//GAME OVER
 	}
 }
