@@ -15,13 +15,13 @@ public:
 			this->pieces[i] = 0;
 		}
 		for (int i = 0; i < 12; i++) {
-			this->pieces[i] = - 1;
-			this->pieces[31 - i] = 1;
+			this->pieces[i] =  1;
+			this->pieces[31 - i] = -1;
 		}
 	}
 	void initBoard() {
 		int i = 0;
-		for (int y = 0; y < 8; y++)
+		for (int y = 7; y >= 0; y--)
 			for (int x = 0; x < 8; x++)
 			{
 				if (((x + y) % 2) == 0)
@@ -76,10 +76,11 @@ public:
 		positions.push_back(takenPieces);
 	}
 	Move(vector<vector<int>> pos) {
-		for (auto vec : pos) {
-			positions.push_back(vec);
+		if(!pos.empty()){ 
+			for (auto vec : pos) {
+				positions.push_back(vec);
+			}
 		}
-		//positions = pos;
 	}
 
 

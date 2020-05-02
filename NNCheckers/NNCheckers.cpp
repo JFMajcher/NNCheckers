@@ -28,38 +28,70 @@ std::vector<T>& operator+=(std::vector<T>& a, const std::vector<T>& b)
 
 //FUNCTIONS DECLARATIONS
 vector<int> GiveDiagonals(int x);
+vector<int> GivePartialDiagonals(int x, int y);
 vector<Move> GiveMoves(char pieces[32]);
 int SingleDiagonal(int, int);
 vector<Move> NextJumps(Move, char[32]);
 
 int main()
 {
-	int tested = 28;
+	/*int tested = 23;
 	vector<int> test = GiveDiagonals(tested);
 	cout << "Diagonals of " << tested << endl;
 	for (auto t : test) {
 		cout << t << endl;
 	}
-	cout << "End of diagonals." << endl;
+	cout << "End of diagonals." << endl;*/
 	
 	CheckerBoard checkerBoard;
 	checkerBoard.initPieces();
 	for (int i = 0; i < 12; i++) {
-		checkerBoard.pieces[i] = 0;
+		checkerBoard.pieces[31 - i] = 0;
 	}
-	vector<int> v_test = {0 , 9, 17, 18};
+	checkerBoard.pieces[9] = 0;
+	checkerBoard.pieces[18] = 1;
+	vector<int> v_test = {0, 13 , 14, 20, 21, 22};
 	for (int t : v_test) {
 		checkerBoard.pieces[t] = -1;
 	}
+	vector<int> test_pos = { 9, 18 };
+	vector<int> test_taken_pcs = { 13 };
+	vector<vector<int>> test_big;
+	test_big.push_back(test_pos);
+	test_big.push_back(test_taken_pcs);
+	Move test_m(test_big);
+	cout << "Visited positions of the move : \n";
+	for (auto pos : test_m.positions[0]) {
+		cout << pos << endl;
+	}
+	cout << "and taken pieces : \n";
+	for (auto pos : test_m.positions[1]) {
+		cout << pos << endl;
+	}
+	int position = test_m.positions[0].back();
+	int prev_taken_piece = test_m.positions[1].back();
+	cout << "Curent position of the piece : " << position << endl;
+	cout << "And most recent taken piece : " << prev_taken_piece << endl;
+	cout << "And most recent previous position : " << SingleDiagonal(position, prev_taken_piece) << endl;
+	/*cout << SingleDiagonal(13, 8) << endl;
+	vector<int> v_test2 = GiveDiagonals(8);
+	for (auto d : v_test2) { cout << d << endl; }*/
+	vector<Move> test_next_jumps = NextJumps(test_m, checkerBoard.pieces);
 	
-	//cout << sizeof(checkerBoard.pieces) << endl;
-	//int test_d = SingleDiagonal(24, 20);
-	//cout << test_d << endl;
+	cout << "Number of additional jumps : " << test_next_jumps.size() << endl;
+	int i = 1;
+	for (auto move : test_next_jumps) {
+		cout << "Visited positions of move " << i << " : " << endl;
+		for (auto pos : move.positions[0]) { cout << pos << endl; }
+		cout << "and taken pieces : \n";
+		for (auto pos : move.positions[1]) { cout << pos << endl; }
+		i++;
+	}
+	
 	/*Move test_move(2, 9);
-	vector<Move> test_jumps;
 	vector<Move> test_jumps = NextJumps(test_move, checkerBoard.pieces);*/
 
-	vector<Move> available_moves = GiveMoves(checkerBoard.pieces);
+	/*vector<Move> available_moves = GiveMoves(checkerBoard.pieces);
 	int i = 1;
 	for (auto move : available_moves) {
 		cout << "Move no " << i << endl;
@@ -69,9 +101,9 @@ int main()
 		}
 		cout << endl;
 	}
-	cout << "Size of vector of moves: " << available_moves.size() << endl;
+	cout << "Size of vector of moves: " << available_moves.size() << endl;*/
 	
-	
+	cout << "End of test. \n";
 	checkerBoard.initBoard();
 	checkerBoard.printBoard();
 }
@@ -103,6 +135,17 @@ vector<int> GiveDiagonals(int x) { //returns vector of diagonal indexes in a for
 	}
 	return v_diagonals;
 }
+//returns vector of x diagonals without y
+vector<int> GivePartialDiagonals(int x, int y) {
+	vector<int> result = GiveDiagonals(x);
+	for (std::vector<int>::iterator it = result.begin(); it != result.end(); ++it) {
+		if (*it == y) {
+			result.erase(it);
+			break;
+		}
+	}
+	return result;
+}
 //vector<int> GiveKingDiagonals;
 int SingleDiagonal(int init_pos, int obstacle_pos) {
 	vector<int> diagonals_1 = GiveDiagonals(init_pos);
@@ -117,18 +160,23 @@ int SingleDiagonal(int init_pos, int obstacle_pos) {
 	}	
 	return 99;
 }
-
+//cofa sie
 vector<Move> NextJumps(Move jump, char pieces[32]) {
 	vector<Move> possible_jumps;
 	int position = jump.positions[0].back();
-	vector<int> diagonals = GiveDiagonals(position);
+	int prev_taken_piece = jump.positions[1].back();
+	int prev_position = SingleDiagonal(position, prev_taken_piece);
+	vector<int> diagonals = GivePartialDiagonals(position, prev_taken_piece);
 	int size = jump.positions[0].size();
 	for (int d : diagonals) {
-		if (d != 99 && pieces[d] == -1 && SingleDiagonal(position, d) != 99) {
-			if (d != jump.positions[0][size - 1] && !pieces[SingleDiagonal(position, d)]) {
+		if (0) { continue; }
+		else {
+			if(d != 99 && SingleDiagonal(position, d) != 99) {
+				if (!pieces[SingleDiagonal(position, d)] && pieces[d] == -1) {
 				possible_jumps.push_back(jump.ActuateJump(SingleDiagonal(position, d), d));
-			}			
-		}
+				}
+			}
+		}			
 	}
 	return possible_jumps;
 }
